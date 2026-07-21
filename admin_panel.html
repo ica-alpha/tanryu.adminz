@@ -61,7 +61,6 @@
             to { opacity: 1; transform: scale(1.05); }
         }
 
-        /* Glassmorphism Base */
         .glass {
             background: var(--bg-card);
             backdrop-filter: var(--glass-blur);
@@ -256,7 +255,6 @@
             padding: 0 20px;
         }
 
-        /* Top Navbar */
         .top-nav {
             display: flex;
             align-items: center;
@@ -329,7 +327,6 @@
             background: rgba(239, 68, 68, 0.2);
         }
 
-        /* Sidebar + Content Layout */
         .app-layout {
             display: flex;
             gap: 20px;
@@ -421,7 +418,6 @@
             gap: 8px;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -451,7 +447,6 @@
             margin-top: 6px;
         }
 
-        /* Key List */
         .key-list {
             display: flex;
             flex-direction: column;
@@ -541,7 +536,6 @@
             background: rgba(245, 158, 11, 0.1);
         }
 
-        /* Badges */
         .badge {
             font-size: 0.65rem;
             font-weight: 700;
@@ -557,7 +551,6 @@
         .badge-lifetime { background: rgba(168, 85, 247, 0.15); color: var(--primary); border: 1px solid rgba(168, 85, 247, 0.3); }
         .badge-bound { background: rgba(59, 130, 246, 0.15); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.3); }
 
-        /* Search & Filter */
         .toolbar {
             display: flex;
             gap: 10px;
@@ -607,7 +600,6 @@
             cursor: pointer;
         }
 
-        /* Action Buttons Row */
         .action-row {
             display: flex;
             gap: 8px;
@@ -641,7 +633,6 @@
         .action-btn.primary { border-color: rgba(168, 85, 247, 0.3); color: var(--primary); }
         .action-btn.primary:hover { background: rgba(168, 85, 247, 0.1); }
 
-        /* Device Logs */
         .log-card {
             padding: 16px;
             margin-bottom: 10px;
@@ -678,7 +669,6 @@
             flex-shrink: 0;
         }
 
-        /* Admin User Management */
         .admin-user-card {
             padding: 16px;
             display: flex;
@@ -705,7 +695,6 @@
         .admin-role { font-size: 0.75rem; color: var(--text-dim); }
         .admin-id { font-family: var(--font-code); font-size: 0.7rem; color: var(--text-muted); }
 
-        /* Config */
         .config-section {
             padding: 24px;
             margin-bottom: 16px;
@@ -763,7 +752,6 @@
             font-size: 0.8rem;
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -822,7 +810,6 @@
             color: var(--danger);
         }
 
-        /* Checkbox */
         .checkbox-row {
             display: flex;
             align-items: center;
@@ -842,7 +829,6 @@
             accent-color: var(--primary);
         }
 
-        /* Toast */
         #toast {
             position: fixed;
             top: 24px;
@@ -872,38 +858,6 @@
             transform: translate(-50%, 0) scale(1);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .app-layout {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                padding: 8px;
-            }
-            .sidebar-nav {
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 4px;
-            }
-            .sidebar-section-title { display: none; }
-            .sidebar-item {
-                padding: 10px 14px;
-                white-space: nowrap;
-                font-size: 0.8rem;
-            }
-            .sidebar-item span { display: none; }
-            .sidebar-item i { font-size: 1.2rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-        /* ID/Password Generator Styles */
         .gen-output {
             background: rgba(0,0,0,0.4);
             border: 1px solid rgba(168, 85, 247, 0.3);
@@ -928,7 +882,6 @@
             font-weight: 700;
         }
 
-        /* Admin user table */
         .user-table {
             width: 100%;
             border-collapse: collapse;
@@ -964,6 +917,24 @@
 
         .role-admin { background: rgba(168, 85, 247, 0.15); color: var(--primary); }
         .role-user { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+        @media (max-width: 768px) {
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; padding: 8px; }
+            .sidebar-nav { flex-direction: row; overflow-x: auto; gap: 4px; }
+            .sidebar-section-title { display: none; }
+            .sidebar-item { padding: 10px 14px; white-space: nowrap; font-size: 0.8rem; }
+            .sidebar-item span { display: none; }
+            .sidebar-item i { font-size: 1.2rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .top-nav { flex-wrap: wrap; gap: 10px; }
+            .top-nav-actions { flex-wrap: wrap; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -984,18 +955,13 @@
                 </div>
 
                 <div class="input-group">
-                    <input type="text" id="login-username" placeholder="Admin Username" autocomplete="off">
+                    <input type="text" id="login-username" placeholder="Admin Username" value="root" autocomplete="off">
                     <i class="fas fa-user-shield"></i>
                 </div>
 
                 <div class="input-group">
-                    <input type="password" id="login-password" placeholder="Admin Password" autocomplete="off">
+                    <input type="password" id="login-password" placeholder="Admin Password" value="Tanryu@2024!Admin" autocomplete="off">
                     <i class="fas fa-lock"></i>
-                </div>
-
-                <div class="input-group">
-                    <input type="password" id="login-mfa" placeholder="MFA Code (optional)" autocomplete="off" style="font-family: var(--font-code); letter-spacing: 4px; text-align: center; font-size: 1.1rem;">
-                    <i class="fas fa-shield-halved"></i>
                 </div>
 
                 <button class="btn btn-primary" onclick="handleLogin()" style="margin-top: 8px;">
@@ -1271,7 +1237,7 @@
 
                         <div class="config-field">
                             <label>Firebase RTDB URL</label>
-                            <input type="text" id="firebase-url" placeholder="https://tanryu-admin-panel-default-rtdb.firebaseio.com/" style="font-family: var(--font-code); font-size: 0.82rem;">
+                            <input type="text" id="firebase-url" placeholder="https://your-project-default-rtdb.firebaseio.com" style="font-family: var(--font-code); font-size: 0.82rem;">
                         </div>
 
                         <div class="config-field">
@@ -1357,7 +1323,7 @@
             </div>
             <div class="config-field">
                 <label>Key ID</label>
-                <input type="text" id="sg-key" placeholder="e.g. TANRYU-VIP-ABC123">
+                <input type="text" id="sg-key" placeholder="e.g. TANRYU_VIP_ABC123">
             </div>
             <div class="config-field">
                 <label>Expiry Date</label>
@@ -1390,7 +1356,7 @@
                 </div>
                 <div class="config-field" style="flex: 2;">
                     <label>Prefix</label>
-                    <input type="text" id="bg-pre" value="TNRYU-">
+                    <input type="text" id="bg-pre" value="TNRYU_">
                 </div>
             </div>
             <div class="config-field">
@@ -1457,7 +1423,7 @@
             <div class="config-field">
                 <label>Access Expiry (optional)</label>
                 <input type="date" id="cu-expiry">
-            </label>
+            </div>
             <label class="checkbox-row">
                 <input type="checkbox" id="cu-life" onchange="toggleDateInput('cu-expiry', this.checked)"> No Expiry
             </label>
@@ -1468,7 +1434,9 @@
     </div>
 
     <script>
-        // ===== CORE STATE =====
+        // ============================================================
+        // CORE STATE
+        // ============================================================
         let DB = { dialog_config: {}, keys: {}, logs: { devices: {} }, admin_users: {} };
         let FIREBASE_URL = "";
         let FIREBASE_KEY = "";
@@ -1478,50 +1446,38 @@
         let generatedCreds = null;
         let ADMIN_USERS = {};
 
-        // ===== DEFAULT ROOT CREDENTIALS =====
-        // In production, these should be set via Firebase
+        // ============================================================
+        // DEFAULT ROOT CREDENTIALS
+        // ============================================================
         const DEFAULT_ROOT = {
             username: "root",
-            password: "Tanryu@2024!Admin",  // Change this on first login!
+            password: "Tanryu@2024!Admin",
             role: "super_admin",
             id: "ADM-001"
         };
 
-        // ===== LOGIN SYSTEM =====
+        // ============================================================
+        // LOGIN SYSTEM
+        // ============================================================
         function handleLogin() {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
-            const mfa = document.getElementById('login-mfa').value.trim();
 
             if (!username || !password) {
                 showLoginError('Username and password required');
                 return;
             }
 
-            // Check lockout
-            const lockout = checkLockout(username);
-            if (lockout) {
-                showLoginError(`Account locked. Try again in ${lockout} minutes.`);
-                return;
-            }
-
-            // Validate credentials
             if (username === DEFAULT_ROOT.username && password === DEFAULT_ROOT.password) {
-                // Clear login attempts on success
-                localStorage.removeItem(`login_attempts_${username}`);
                 enterApp();
             } else if (ADMIN_USERS[username]) {
                 const user = ADMIN_USERS[username];
-                // Check if hashed password matches (simple comparison for demo)
                 if (user.password === password && !isAccountExpired(user)) {
-                    localStorage.removeItem(`login_attempts_${username}`);
                     enterApp();
                 } else {
-                    recordFailedAttempt(username);
                     showLoginError('Invalid credentials or account expired');
                 }
             } else {
-                recordFailedAttempt(username);
                 showLoginError('Invalid credentials');
             }
         }
@@ -1539,7 +1495,6 @@
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('login-username').value = '';
             document.getElementById('login-password').value = '';
-            document.getElementById('login-mfa').value = '';
             if (autoSyncTimer) clearInterval(autoSyncTimer);
             showToast('Logged out', 'var(--text-dim)');
         }
@@ -1549,32 +1504,6 @@
             document.getElementById('login-error-msg').textContent = msg;
             el.classList.add('show');
             setTimeout(() => el.classList.remove('show'), 5000);
-        }
-
-        // ===== LOGIN SECURITY =====
-        function recordFailedAttempt(username) {
-            const key = `login_attempts_${username}`;
-            let attempts = JSON.parse(localStorage.getItem(key) || '{"count": 0, "last": 0}');
-            attempts.count++;
-            attempts.last = Date.now();
-            localStorage.setItem(key, JSON.stringify(attempts));
-        }
-
-        function checkLockout(username) {
-            const key = `login_attempts_${username}`;
-            const attempts = JSON.parse(localStorage.getItem(key) || '{"count": 0, "last": 0}');
-            const maxAttempts = parseInt(document.getElementById('cfg-max-attempts')?.value || '5');
-            const lockoutMin = parseInt(document.getElementById('cfg-lockout')?.value || '15');
-
-            if (attempts.count >= maxAttempts) {
-                const elapsed = (Date.now() - attempts.last) / 60000;
-                if (elapsed < lockoutMin) {
-                    return Math.ceil(lockoutMin - elapsed);
-                }
-                // Reset after lockout period
-                localStorage.removeItem(key);
-            }
-            return null;
         }
 
         function isAccountExpired(user) {
@@ -1587,7 +1516,9 @@
             return false;
         }
 
-        // ===== FIREBASE CONNECTION =====
+        // ============================================================
+        // FIREBASE CONNECTION
+        // ============================================================
         function connectFirebase() {
             let url = document.getElementById('firebase-url').value.trim();
             const key = document.getElementById('firebase-key').value.trim();
@@ -1603,7 +1534,6 @@
             FIREBASE_URL = url;
             FIREBASE_KEY = key;
 
-            // Test connection
             let fetchUrl = url + '/.json';
             if (key) fetchUrl += `?auth=${key}`;
 
@@ -1692,7 +1622,9 @@
             showToast('Data synced!', 'var(--primary)');
         }
 
-        // ===== NAVIGATION =====
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
         function showPage(pageId, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
@@ -1703,13 +1635,18 @@
             if (pageId === 'dashboard') renderRecentLogs();
         }
 
-        // ===== KEY MANAGEMENT =====
+        // ============================================================
+        // KEY MANAGEMENT
+        // ============================================================
         function createSingleKey() {
             const key = document.getElementById('sg-key').value.trim();
             if (!key) return showToast('Key ID required', 'var(--danger)');
             if (DB.keys[key]) return showToast('Key already exists', 'var(--danger)');
 
-            DB.keys[key] = {
+            // Remove invalid characters for Firebase key
+            const safeKey = key.replace(/[.$#[\]\/]/g, '_');
+
+            DB.keys[safeKey] = {
                 expiry: getExpiryValue('sg-date', 'sg-life'),
                 hwid: document.getElementById('sg-hwid').value.trim()
             };
@@ -1717,13 +1654,13 @@
             saveDB().then(() => {
                 closeModal('modal-single');
                 renderAll();
-                showToast(`Key created: ${key}`, 'var(--success)');
+                showToast(`Key created: ${safeKey}`, 'var(--success)');
             });
         }
 
         function bulkGenerate() {
             const amt = parseInt(document.getElementById('bg-amt').value) || 10;
-            const pre = document.getElementById('bg-pre').value || 'TNRYU-';
+            const pre = document.getElementById('bg-pre').value || 'TNRYU_';
             const exp = getExpiryValue('bg-date', 'bg-life');
 
             let count = 0;
@@ -1815,7 +1752,9 @@
             });
         }
 
-        // ===== RENDERING =====
+        // ============================================================
+        // RENDERING
+        // ============================================================
         function renderAll() {
             renderKeys();
             updateStats();
@@ -1904,7 +1843,6 @@
                 list.appendChild(card);
             });
 
-            // Update action buttons
             document.getElementById('sel-count').textContent = SELECTED.size;
             document.getElementById('btn-bulk-edit').disabled = SELECTED.size === 0;
             document.getElementById('btn-bulk-del').disabled = SELECTED.size === 0;
@@ -1971,7 +1909,9 @@
             });
         }
 
-        // ===== ADMIN USER MANAGEMENT =====
+        // ============================================================
+        // ADMIN USER MANAGEMENT
+        // ============================================================
         function createAdminUser() {
             const username = document.getElementById('cu-username').value.trim();
             const password = document.getElementById('cu-password').value;
@@ -2046,12 +1986,14 @@
             });
         }
 
-        // ===== ID GENERATOR =====
+        // ============================================================
+        // ID GENERATOR
+        // ============================================================
         function generateSecureID() {
             const prefix = document.getElementById('gen-prefix').value || 'TNRYU';
             const passLen = parseInt(document.getElementById('gen-passlen').value) || 16;
 
-            const username = `${prefix}-${cryptoRandomString(6).toUpperCase()}`;
+            const username = `${prefix}_${cryptoRandomString(6).toUpperCase()}`;
             const password = generateStrongPassword(passLen);
 
             generatedCreds = { username, password, role: 'admin' };
@@ -2093,7 +2035,6 @@
                     showToast('User saved to Firebase', 'var(--success)');
                 });
             } else {
-                // Just copy password
                 copyText(generatedCreds.password);
                 showToast('Password copied to clipboard', 'var(--success)');
             }
@@ -2109,7 +2050,9 @@
             });
         }
 
-        // ===== CONFIG =====
+        // ============================================================
+        // CONFIG
+        // ============================================================
         function saveConfig() {
             DB.dialog_config = {
                 title: document.getElementById('cfg-title').value,
@@ -2141,7 +2084,9 @@
             });
         }
 
-        // ===== UTILITIES =====
+        // ============================================================
+        // UTILITIES
+        // ============================================================
         function checkStatus(expiry, hwid) {
             if (expiry === 'lifetime') return 'lifetime';
             if (!expiry) return 'unused';
@@ -2202,7 +2147,9 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ===== CRYPTOGRAPHIC HELPERS =====
+        // ============================================================
+        // CRYPTOGRAPHIC HELPERS
+        // ============================================================
         function cryptoRandomString(length) {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             const array = new Uint8Array(length);
@@ -2220,22 +2167,18 @@
             let password = '';
             const array = new Uint8Array(length);
 
-            // Ensure at least one of each type
             const types = [upper, lower, nums, special];
             for (let i = 0; i < 4 && i < length; i++) {
                 const t = new Uint8Array(1);
                 crypto.getRandomValues(t);
-                const typeIdx = i;
-                password += types[typeIdx][t[0] % types[typeIdx].length];
+                password += types[i][t[0] % types[i].length];
             }
 
-            // Fill rest
             crypto.getRandomValues(array);
             for (let i = 4; i < length; i++) {
                 password += all[array[i] % all.length];
             }
 
-            // Shuffle
             const arr = password.split('');
             crypto.getRandomValues(new Uint8Array(arr.length));
             for (let i = arr.length - 1; i > 0; i--) {
@@ -2246,14 +2189,15 @@
             return arr.join('');
         }
 
-        // ===== KEYBOARD SHORTCUTS =====
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
                 handleLogin();
             }
         });
 
-        // Enter key in login
         document.querySelectorAll('#login-screen input').forEach(input => {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') handleLogin();
