@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TanRyu Admin Panel</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        /* ============================================================
+           ROOT VARIABLES
+           ============================================================ */
+        :root {
+            --cyan: #00f0ff;
+            --cyan-dark: #00b8c9;
+            --purple: #b026ff;
+            --purple-dark: #8a1ac9;
+            --green: #00ff66;
+            --gold: #ffd700;
+            --red: #ff0040;
+            --bg-primary: #070b17;
+            --bg-secondary: #0e1528;
+            --bg-card: rgba(14, 21, 40, 0.85);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(0, 240, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8892b0;
+            --text-muted: #4a5578;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(0, 240, 255, 0.05);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           ANIMATED BACKGROUND
+           ============================================================ */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(176, 38, 255, 0.08), transparent 70%);
+            top: -200px;
+            right: -200px;
+            z-index: -1;
+            animation: floatBg 15s infinite alternate ease-in-out;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.06), transparent 70%);
+            bottom: -200px;
+            left: -200px;
+            z-index: -1;
+            animation: floatBg 20s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes floatBg {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.2); }
+        }
+
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: 10px;
+        }
+
+        /* ============================================================
+           CONTAINER
+           ============================================================ */
+        .container {
+            max-width: 720px;
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 240, 255, 0.02), transparent 60%);
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header-sub {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: -2px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-user .name {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .header-user .name span {
+            color: var(--cyan);
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 64, 0.08);
+            border: 1px solid rgba(255, 0, 64, 0.08);
+            color: var(--red);
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 64, 0.15);
+            transform: scale(1.02);
+        }
+
+        /* ============================================================
+           LOGIN SCREEN
+           ============================================================ */
+        .login-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .login-box .login-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .login-box h3 {
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .login-box .sub {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 20px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+            margin-bottom: 10px;
+        }
+
+        .login-box input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.05);
+        }
+
+        .login-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 25px rgba(0, 240, 255, 0.2);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-error {
+            color: var(--red);
+            font-size: 0.8rem;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .create-admin-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .create-admin-section .label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .create-admin-section .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .create-admin-section .input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.85rem;
+            min-width: 0;
+        }
+
+        .create-admin-section .input-group input:focus {
+            border-color: var(--cyan);
+        }
+
+        .btn-success {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--green), #00cc55);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 255, 102, 0.2);
+        }
+
+        .status-text {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================================
+           ADMIN PANEL
+           ============================================================ */
+        .admin-panel {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* ============================================================
+           STATS
+           ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .num {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-card .label {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .stat-card .icon {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tab-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 240, 255, 0.08);
+            color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ============================================================
+           SEARCH
+           ============================================================ */
+        .search-box {
+            margin-bottom: 12px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.05);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           CREATE SECTION
+           ============================================================ */
+        .create-section {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+
+        .create-section .title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .create-section .title .badge {
+            font-size: 0.55rem;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--cyan);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .input-group input:focus {
+            border-color: var(--cyan);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .btn-warning {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--gold), #f5a623);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn-danger-sm {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 0, 64, 0.12);
+            color: var(--red);
+            font-weight: 600;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-danger-sm:hover {
+            background: rgba(255, 0, 64, 0.2);
+        }
+
+        .btn-warning-sm {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 215, 0, 0.12);
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-warning-sm:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .key-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            color: var(--cyan);
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .status-text {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            color: var(--text-secondary);
+        }
+
+        .status-text.success {
+            color: var(--green);
+        }
+
+        .status-text.error {
+            color: var(--red);
+        }
+
+        /* ============================================================
+           LIST CONTAINER
+           ============================================================ */
+        .list-container {
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item .info .main {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .list-item .info .main .highlight {
+            color: var(--cyan);
+        }
+
+        .list-item .info .sub {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .list-item .info .sub .bound-info {
+            color: var(--gold);
+        }
+
+        .status-badge {
+            font-size: 0.55rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge.active {
+            background: rgba(0, 255, 102, 0.12);
+            color: var(--green);
+        }
+
+        .status-badge.bound {
+            background: rgba(255, 215, 0, 0.12);
+            color: var(--gold);
+        }
+
+        .status-badge.inactive {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================================
+           EMPTY STATE
+           ============================================================ */
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state .icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            opacity: 0.3;
+        }
+
+        .empty-state .text {
+            font-size: 0.85rem;
+        }
+
+        .empty-state .sub {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+            .header-user { width: 100%; justify-content: space-between; }
+            .create-admin-section .input-group { flex-direction: column; }
+            .input-group { flex-direction: column; }
+            .input-group input { min-width: 0; }
+            .login-box { padding: 16px; }
+            .tab-btn { font-size: 0.7rem; padding: 8px 10px; }
+        }
+
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .stat-card { padding: 10px; }
+            .stat-card .num { font-size: 1.2rem; }
+            .list-item { flex-direction: column; align-items: stretch; }
+            .list-actions { justify-content: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ============================================================ -->
+    <!-- HEADER -->
+    <!-- ============================================================ -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">⛩️</div>
+            <div>
+                <div class="header-title">TANRYU ADMIN</div>
+                <div class="header-sub">Key Management System</div>
+            </div>
+        </div>
+        <div class="header-user" id="headerUser" style="display:none;">
+            <span class="name">👑 <span id="adminName">Admin</span></span>
+            <button class="logout-btn" onclick="adminLogout()">⏻ Logout</button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- LOGIN BOX -->
+    <!-- ============================================================ -->
+    <div id="loginBox" class="login-box">
+        <div class="login-icon">🔐</div>
+        <h3>Admin Login</h3>
+        <div class="sub">Enter your credentials to access the panel</div>
+
+        <input type="text" id="adminUser" placeholder="Username" value="admin">
+        <input type="password" id="adminPass" placeholder="Password" value="admin">
+        <button class="login-btn" onclick="adminLogin()">🔓 Login</button>
+        <div id="adminError" class="login-error"></div>
+
+        <div class="create-admin-section">
+            <span class="label">🆕 First time? Create an admin account</span>
+            <div class="input-group">
+                <input type="text" id="newAdminUser" placeholder="Username">
+                <input type="text" id="newAdminPass" placeholder="Password">
+                <button class="btn-success" onclick="createAdmin()">Create</button>
+            </div>
+            <div id="adminCreateStatus" class="status-text"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ADMIN PANEL -->
+    <!-- ============================================================ -->
+    <div id="adminPanel" class="admin-panel">
+
+        <!-- ===== STATS ===== -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="icon">🔑</span>
+                <div class="num" id="totalKeys">0</div>
+                <div class="label">Total Keys</div>
+            </div>
+            <div class="stat-card">
+                <span class="icon">📤</span>
+                <div class="num" id="activeKeys">0</div>
+                <div class="label">Available</div>
+            </div>
+            <div class="stat-card">
+                <span class="icon">🔒</span>
+                <div class="num" id="boundKeys">0</div>
+                <div class="label">Bound</div>
+            </div>
+            <div class="stat-card">
+                <span class="icon">📱</span>
+                <div class="num" id="devicesCount">0</div>
+                <div class="label">Devices</div>
+            </div>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('keys')">🔑 Keys</button>
+            <button class="tab-btn" onclick="switchTab('create')">➕ Create</button>
+            <button class="tab-btn" onclick="switchTab('devices')">📱 Devices</button>
+        </div>
+
+        <!-- ===== TAB: KEYS ===== -->
+        <div class="tab-content active" id="tab-keys">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search keys..." oninput="searchItems()">
+            </div>
+            <div class="list-container" id="keyList">
+                <div class="empty-state">
+                    <div class="icon">⏳</div>
+                    <div class="text">Loading keys...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: CREATE ===== -->
+        <div class="tab-content" id="tab-create">
+            <div class="create-section">
+                <div class="title">🔑 Generate Single Key <span class="badge">NEW</span></div>
+                <div class="input-group">
+                    <input type="text" id="keyUsername" placeholder="Username (optional)">
+                    <button class="btn-primary" onclick="generateKey()">Generate</button>
+                </div>
+                <div id="keyGenStatus" class="status-text"></div>
+                <div id="newKeyDisplay" class="key-display"></div>
+            </div>
+
+            <div class="create-section">
+                <div class="title">📦 Bulk Generate Keys</div>
+                <div class="input-group">
+                    <input type="number" id="bulkCount" placeholder="Count" value="5" min="1" max="50">
+                    <button class="btn-warning" onclick="bulkGenerate()">Generate Bulk</button>
+                </div>
+                <div id="bulkStatus" class="status-text"></div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: DEVICES ===== -->
+        <div class="tab-content" id="tab-devices">
+            <div class="list-container" id="deviceList">
+                <div class="empty-state">
+                    <div class="icon">⏳</div>
+                    <div class="text">Loading devices...</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const FIREBASE_CONFIG = {
+    databaseURL: "https://tanryu-admin-default-rtdb.firebaseio.com/"
+};
+if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
+const ADMIN_DEVICE = 'ADMIN_DEVICE';
+
+function hashPassword(p) { return CryptoJS.SHA256(p).toString(); }
+
+// ============================================================
+// ADMIN LOGIN
+// ============================================================
+function createAdmin() {
+    const user = document.getElementById('newAdminUser').value.trim();
+    const pass = document.getElementById('newAdminPass').value.trim();
+    const status = document.getElementById('adminCreateStatus');
+
+    if (!user || !pass) {
+        status.textContent = '❌ Enter username and password';
+        status.className = 'status-text error';
+        return;
+    }
+    if (pass.length < 4) {
+        status.textContent = '❌ Password must be at least 4 characters';
+        status.className = 'status-text error';
+        return;
+    }
+
+    const hashed = hashPassword(pass);
+
+    db.ref('admins/' + user).set({
+        username: user,
+        password: hashed,
+        createdAt: new Date().toISOString()
+    })
+    .then(() => {
+        status.textContent = '✅ Admin "' + user + '" created! You can now login.';
+        status.className = 'status-text success';
+        document.getElementById('newAdminUser').value = '';
+        document.getElementById('newAdminPass').value = '';
+        document.getElementById('adminUser').value = user;
+        document.getElementById('adminPass').value = pass;
+    })
+    .catch(e => {
+        status.textContent = '❌ ' + e.message;
+        status.className = 'status-text error';
+    });
+}
+
+function adminLogin() {
+    const user = document.getElementById('adminUser').value.trim();
+    const pass = document.getElementById('adminPass').value.trim();
+    const error = document.getElementById('adminError');
+
+    if (!user || !pass) {
+        error.textContent = '❌ Enter username and password';
+        return;
+    }
+    error.textContent = '';
+
+    const hashedPass = hashPassword(pass);
+
+    db.ref('admins/' + user).once('value')
+        .then(s => {
+            const data = s.val();
+            if (!data) {
+                error.textContent = '❌ Admin not found. Create one below.';
+                return;
+            }
+            if (data.password !== hashedPass) {
+                error.textContent = '❌ Wrong password';
+                return;
+            }
+
+            localStorage.setItem('admin_logged', user);
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('headerUser').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminName').textContent = user;
+            loadKeys();
+            loadDevices();
+            loadStats();
+        })
+        .catch(e => {
+            error.textContent = '❌ ' + e.message;
+        });
+}
+
+function adminLogout() {
+    localStorage.removeItem('admin_logged');
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('headerUser').style.display = 'none';
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminError').textContent = '';
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+    if (tab === 'keys') loadKeys();
+    if (tab === 'devices') loadDevices();
+}
+
+// ============================================================
+// GENERATE KEY
+// ============================================================
+function generateSimpleKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = '';
+    for (let i = 0; i < 8; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+        if (i === 3) key += '-';
+    }
+    return key;
+}
+
+function generateKey() {
+    const username = document.getElementById('keyUsername').value.trim() || 'User';
+    const status = document.getElementById('keyGenStatus');
+    const display = document.getElementById('newKeyDisplay');
+
+    const key = generateSimpleKey();
+
+    db.ref('keys/' + key).set({
+        key: key,
+        username: username,
+        createdAt: new Date().toISOString(),
+        boundTo: null,
+        boundAt: null,
+        status: 'active'
+    })
+    .then(() => {
+        status.textContent = '✅ Key generated successfully!';
+        status.className = 'status-text success';
+        display.textContent = '🔑 ' + key + ' (Available)';
+        display.style.display = 'block';
+        document.getElementById('keyUsername').value = '';
+        loadKeys();
+        loadStats();
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(key).then(() => {
+            display.textContent = '📋 Copied! ' + key;
+            setTimeout(() => {
+                display.textContent = '🔑 ' + key + ' (Available)';
+            }, 3000);
+        });
+    })
+    .catch(e => {
+        status.textContent = '❌ ' + e.message;
+        status.className = 'status-text error';
+    });
+}
+
+function bulkGenerate() {
+    const count = parseInt(document.getElementById('bulkCount').value) || 5;
+    const status = document.getElementById('bulkStatus');
+
+    if (count > 50) {
+        status.textContent = '❌ Maximum 50 keys allowed';
+        status.className = 'status-text error';
+        return;
+    }
+
+    status.textContent = '⏳ Generating ' + count + ' keys...';
+    status.className = 'status-text';
+
+    let keys = [];
+    for (let i = 0; i < count; i++) {
+        const key = generateSimpleKey();
+        keys.push({
+            key: key,
+            data: {
+                key: key,
+                username: 'User' + (i + 1),
+                createdAt: new Date().toISOString(),
+                boundTo: null,
+                boundAt: null,
+                status: 'active'
+            }
+        });
+    }
+
+    const promises = keys.map(k => db.ref('keys/' + k.key).set(k.data));
+
+    Promise.all(promises)
+        .then(() => {
+            status.textContent = '✅ Generated ' + count + ' keys!';
+            status.className = 'status-text success';
+            loadKeys();
+            loadStats();
+
+            const keyList = keys.map(k => k.key).join('\n');
+            alert('Generated Keys:\n\n' + keyList);
+        })
+        .catch(e => {
+            status.textContent = '❌ ' + e.message;
+            status.className = 'status-text error';
+        });
+}
+
+// ============================================================
+// LOAD KEYS
+// ============================================================
+function loadKeys() {
+    const list = document.getElementById('keyList');
+    list.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><div class="text">Loading keys...</div></div>';
+
+    db.ref('keys').once('value')
+        .then(s => {
+            const keys = s.val();
+            if (!keys) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div class="text">No keys found</div><div class="sub">Generate your first key in the "Create" tab</div></div>';
+                return;
+            }
+
+            let html = '';
+            const entries = Object.entries(keys);
+            entries.sort((a, b) => {
+                const order = { active: 0, bound: 1, inactive: 2 };
+                return (order[a[1].status] || 0) - (order[b[1].status] || 0);
+            });
+
+            entries.forEach(([id, data]) => {
+                const isBound = data.boundTo !== null && data.boundTo !== undefined;
+                const statusClass = isBound ? 'bound' : (data.status || 'active');
+                const statusLabel = isBound ? '🔒 Bound' : '🔓 Available';
+                const boundInfo = isBound ? `Bound to: ${data.boundTo.slice(0, 16)}...` : 'Not bound';
+
+                html += `
+                    <div class="list-item">
+                        <div class="info">
+                            <div class="main"><span class="highlight">${data.key}</span> <span style="font-size:0.7rem;color:var(--text-secondary);">${data.username || 'User'}</span></div>
+                            <div class="sub"><span class="bound-info">${boundInfo}</span></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span class="status-badge ${statusClass}">${statusLabel}</span>
+                            <div class="list-actions">
+                                <button class="btn-danger-sm" onclick="deleteKey('${id}')">🗑️</button>
+                                ${!isBound ? `<button class="btn-warning-sm" onclick="copyKey('${data.key}')">📋</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        })
+        .catch(e => {
+            list.innerHTML = '<div class="empty-state"><div class="icon">❌</div><div class="text" style="color:var(--red);">Error loading keys</div></div>';
+        });
+}
+
+function copyKey(key) {
+    navigator.clipboard.writeText(key).then(() => {
+        alert('✅ Key copied: ' + key);
+    });
+}
+
+function deleteKey(keyId) {
+    if (!confirm('⚠️ Delete this key permanently?')) return;
+    db.ref('keys/' + keyId).remove()
+        .then(() => {
+            loadKeys();
+            loadStats();
+        })
+        .catch(e => alert('Error: ' + e.message));
+}
+
+// ============================================================
+// LOAD DEVICES
+// ============================================================
+function loadDevices() {
+    const list = document.getElementById('deviceList');
+    list.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><div class="text">Loading devices...</div></div>';
+
+    db.ref('devices').once('value')
+        .then(s => {
+            const devices = s.val();
+            if (!devices) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div class="text">No devices registered</div></div>';
+                return;
+            }
+
+            let html = '';
+            Object.entries(devices).forEach(([id, data]) => {
+                const online = data.online ? '🟢 Online' : '⚪ Offline';
+
+                html += `
+                    <div class="list-item">
+                        <div class="info">
+                            <div class="main"><span class="highlight">${data.deviceId || id}</span></div>
+                            <div class="sub">${data.username || 'User'} • ${data.key || 'No key'} • ${online}</div>
+                            <div class="sub" style="font-size:0.55rem;opacity:0.5;">Bound: ${data.boundAt ? new Date(data.boundAt).toLocaleDateString() : 'N/A'}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span class="status-badge ${data.status || 'active'}">${data.status || 'active'}</span>
+                            <div class="list-actions">
+                                <button class="btn-danger-sm" onclick="revokeDevice('${id}')">🔒 Revoke</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        })
+        .catch(e => {
+            list.innerHTML = '<div class="empty-state"><div class="icon">❌</div><div class="text" style="color:var(--red);">Error loading devices</div></div>';
+        });
+}
+
+function revokeDevice(deviceId) {
+    if (!confirm('⚠️ Revoke access for this device?')) return;
+    db.ref('devices/' + deviceId + '/status').set('revoked')
+        .then(() => loadDevices())
+        .catch(e => alert('Error: ' + e.message));
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function loadStats() {
+    // Keys stats
+    db.ref('keys').once('value')
+        .then(s => {
+            const keys = s.val();
+            if (!keys) {
+                document.getElementById('totalKeys').textContent = '0';
+                document.getElementById('activeKeys').textContent = '0';
+                document.getElementById('boundKeys').textContent = '0';
+                return;
+            }
+            const entries = Object.entries(keys);
+            const bound = entries.filter(([k, v]) => v.boundTo !== null && v.boundTo !== undefined).length;
+            document.getElementById('totalKeys').textContent = entries.length;
+            document.getElementById('activeKeys').textContent = entries.filter(([k, v]) => !v.boundTo && v.status === 'active').length;
+            document.getElementById('boundKeys').textContent = bound;
+        });
+
+    // Devices stats
+    db.ref('devices').once('value')
+        .then(s => {
+            const devices = s.val();
+            document.getElementById('devicesCount').textContent = devices ? Object.keys(devices).length : 0;
+        });
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+function searchItems() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.list-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? 'flex' : 'none';
+    });
+}
+
+// ============================================================
+// AUTO LOGIN
+// ============================================================
+if (localStorage.getItem('admin_logged')) {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('headerUser').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminName').textContent = localStorage.getItem('admin_logged');
+    loadKeys();
+    loadDevices();
+    loadStats();
+}
+
+console.log('⛩️ TanRyu Admin Panel');
+console.log('🔑 Default login: admin / admin');
+</script>
+
+</body>
+</html>
