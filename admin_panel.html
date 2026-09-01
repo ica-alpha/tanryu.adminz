@@ -43,7 +43,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated Background */
         body::before {
             content: '';
             position: fixed;
@@ -221,6 +220,12 @@
         .btn-primary:active {
             transform: scale(0.96);
             box-shadow: 0 3px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-danger {
@@ -726,7 +731,8 @@
         }
 
         .config-field input,
-        .config-field textarea {
+        .config-field textarea,
+        .config-field select {
             width: 100%;
             padding: 13px 16px;
             background: rgba(0,0,0,0.3);
@@ -740,7 +746,8 @@
         }
 
         .config-field input:focus,
-        .config-field textarea:focus {
+        .config-field textarea:focus,
+        .config-field select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
         }
@@ -827,6 +834,56 @@
             width: 18px;
             height: 18px;
             accent-color: var(--primary);
+        }
+
+        /* ===== SWITCH (for toggle) ===== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transition: 0.4s;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            transition: 0.4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+            background: rgba(168, 85, 247, 0.3);
+            border-color: var(--primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background: var(--primary);
         }
 
         #toast {
@@ -916,7 +973,17 @@
         }
 
         .role-admin { background: rgba(168, 85, 247, 0.15); color: var(--primary); }
+        .role-super { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
         .role-user { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+        .status-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .status-badge.enabled { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .status-badge.disabled { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
 
         @media (max-width: 768px) {
             .app-layout { flex-direction: column; }
@@ -955,12 +1022,12 @@
                 </div>
 
                 <div class="input-group">
-                    <input type="text" id="login-username" placeholder="Admin Username" value="root" autocomplete="off">
+                    <input type="text" id="login-username" placeholder="Admin Username" autocomplete="off">
                     <i class="fas fa-user-shield"></i>
                 </div>
 
                 <div class="input-group">
-                    <input type="password" id="login-password" placeholder="Admin Password" value="Tanryu@2024!Admin" autocomplete="off">
+                    <input type="password" id="login-password" placeholder="Admin Password" autocomplete="off">
                     <i class="fas fa-lock"></i>
                 </div>
 
@@ -1143,7 +1210,7 @@
                         </div>
                     </div>
 
-                    <div class="glass" style="padding: 20px; margin-bottom: 16px;">
+                    <div class="glass" style="padding: 20px; margin-bottom: 16px; overflow-x: auto;">
                         <table class="user-table">
                             <thead>
                                 <tr>
@@ -1151,28 +1218,24 @@
                                     <th>Username</th>
                                     <th>Role</th>
                                     <th>Status</th>
+                                    <th>Expiry</th>
                                     <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-user-table">
                                 <tr>
-                                    <td style="font-family: var(--font-code); font-size: 0.8rem;">ADM-001</td>
+                                    <td style="font-family: var(--font-code); font-size: 0.8rem;">SYSTEM</td>
                                     <td><b>root</b></td>
-                                    <td><span class="role-badge role-admin">Super Admin</span></td>
+                                    <td><span class="role-badge role-super">Super Admin</span></td>
                                     <td><span class="badge badge-active">Active</span></td>
+                                    <td style="font-size: 0.75rem; color: var(--text-dim);">Lifetime</td>
                                     <td style="font-size: 0.75rem; color: var(--text-dim);">System</td>
                                     <td><span style="color: var(--text-muted); font-size: 0.75rem;">Protected</span></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <h3 style="font-weight: 700; font-size: 0.95rem; margin-bottom: 12px;">
-                        <i class="fas fa-lock" style="color: var(--warning); margin-right: 6px;"></i>
-                        Active Sessions
-                    </h3>
-                    <div id="session-list"></div>
                 </div>
 
                 <!-- ID Generator Page -->
@@ -1257,6 +1320,24 @@
                 <div class="page" id="page-config">
                     <div class="page-header">
                         <h2>System <span>Configuration</span></h2>
+                    </div>
+
+                    <!-- ===== LOGIN SETTINGS - TOGGLE USERNAME/PASSWORD LOGIN ===== -->
+                    <div class="glass config-section">
+                        <h3><i class="fas fa-user-lock"></i> Login Settings</h3>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.9rem;">Enable Username/Password Login</div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim);">Users can login with credentials instead of license keys</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-user-login" onchange="toggleUserLogin()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div id="user-login-status" style="margin-top: 10px; padding: 10px 14px; border-radius: var(--radius-xs); font-size: 0.8rem; display: none;"></div>
                     </div>
 
                     <div class="glass config-section">
@@ -1437,7 +1518,7 @@
         // ============================================================
         // CORE STATE
         // ============================================================
-        let DB = { dialog_config: {}, keys: {}, logs: { devices: {} }, admin_users: {} };
+        let DB = { dialog_config: {}, keys: {}, logs: { devices: {} }, admin_users: {}, system_config: {} };
         let FIREBASE_URL = "";
         let FIREBASE_KEY = "";
         let SELECTED = new Set();
@@ -1447,13 +1528,13 @@
         let ADMIN_USERS = {};
 
         // ============================================================
-        // DEFAULT ROOT CREDENTIALS
+        // DEFAULT ROOT CREDENTIALS (Hardcoded for admin panel access)
         // ============================================================
         const DEFAULT_ROOT = {
             username: "root",
             password: "Tanryu@2024!Admin",
             role: "super_admin",
-            id: "ADM-001"
+            id: "SYSTEM"
         };
 
         // ============================================================
@@ -1468,18 +1549,22 @@
                 return;
             }
 
+            // Check root admin first
             if (username === DEFAULT_ROOT.username && password === DEFAULT_ROOT.password) {
                 enterApp();
-            } else if (ADMIN_USERS[username]) {
+                return;
+            }
+
+            // Check Firebase admin users (if loaded)
+            if (ADMIN_USERS && ADMIN_USERS[username]) {
                 const user = ADMIN_USERS[username];
                 if (user.password === password && !isAccountExpired(user)) {
                     enterApp();
-                } else {
-                    showLoginError('Invalid credentials or account expired');
+                    return;
                 }
-            } else {
-                showLoginError('Invalid credentials');
             }
+
+            showLoginError('Invalid credentials');
         }
 
         function enterApp() {
@@ -1488,6 +1573,7 @@
             startAutoSync();
             showToast('Authenticated successfully', 'var(--success)');
             renderAll();
+            loadUserLoginSetting();
         }
 
         function handleLogout() {
@@ -1548,6 +1634,7 @@
                     if (!DB.logs) DB.logs = { devices: {} };
                     if (!DB.logs.devices) DB.logs.devices = {};
                     if (!DB.admin_users) DB.admin_users = {};
+                    if (!DB.system_config) DB.system_config = {};
 
                     ADMIN_USERS = DB.admin_users;
                     updateAdminTable();
@@ -1562,6 +1649,7 @@
 
                     showToast('Firebase connected!', 'var(--success)');
                     renderAll();
+                    loadUserLoginSetting();
                 })
                 .catch(e => {
                     const statusEl = document.getElementById('firebase-status');
@@ -1586,9 +1674,12 @@
                 if (!data.keys) data.keys = {};
                 if (!data.logs) data.logs = { devices: {} };
                 if (!data.logs.devices) data.logs.devices = {};
+                if (!data.admin_users) data.admin_users = {};
+                if (!data.system_config) data.system_config = {};
                 DB = data;
                 ADMIN_USERS = DB.admin_users || {};
                 refreshUI(true);
+                loadUserLoginSetting();
             } catch(e) {}
         }
 
@@ -1623,6 +1714,69 @@
         }
 
         // ============================================================
+        // USER LOGIN TOGGLE (Enable/Disable Username/Password Login)
+        // ============================================================
+        function toggleUserLogin() {
+            const enabled = document.getElementById('toggle-user-login').checked;
+            const statusEl = document.getElementById('user-login-status');
+
+            if (!DB.system_config) DB.system_config = {};
+            DB.system_config.allow_user_login = enabled;
+
+            saveDB().then(() => {
+                statusEl.style.display = 'block';
+                if (enabled) {
+                    statusEl.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success);">
+                            <i class="fas fa-check-circle"></i> 
+                            <span>Username/Password login is <strong>ENABLED</strong>. Users can login with credentials.</span>
+                        </div>
+                    `;
+                    statusEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.05)';
+                } else {
+                    statusEl.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--danger);">
+                            <i class="fas fa-ban"></i> 
+                            <span>Username/Password login is <strong>DISABLED</strong>. Users must use license keys.</span>
+                        </div>
+                    `;
+                    statusEl.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                    statusEl.style.background = 'rgba(239, 68, 68, 0.05)';
+                }
+                showToast(enabled ? 'User login enabled' : 'User login disabled', enabled ? 'var(--success)' : 'var(--danger)');
+            });
+        }
+
+        function loadUserLoginSetting() {
+            const enabled = DB.system_config?.allow_user_login !== false;
+            document.getElementById('toggle-user-login').checked = enabled;
+
+            const statusEl = document.getElementById('user-login-status');
+            if (enabled) {
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; color: var(--success);">
+                        <i class="fas fa-check-circle"></i> 
+                        <span>Username/Password login is <strong>ENABLED</strong></span>
+                    </div>
+                `;
+                statusEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                statusEl.style.background = 'rgba(16, 185, 129, 0.05)';
+            } else {
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; color: var(--text-dim);">
+                        <i class="fas fa-info-circle"></i> 
+                        <span>Username/Password login is <strong>DISABLED</strong></span>
+                    </div>
+                `;
+                statusEl.style.border = '1px solid rgba(255,255,255,0.05)';
+                statusEl.style.background = 'rgba(255,255,255,0.02)';
+            }
+        }
+
+        // ============================================================
         // NAVIGATION
         // ============================================================
         function showPage(pageId, el) {
@@ -1643,12 +1797,11 @@
             if (!key) return showToast('Key ID required', 'var(--danger)');
             if (DB.keys[key]) return showToast('Key already exists', 'var(--danger)');
 
-            // Remove invalid characters for Firebase key
             const safeKey = key.replace(/[.$#[\]\/]/g, '_');
 
             DB.keys[safeKey] = {
                 expiry: getExpiryValue('sg-date', 'sg-life'),
-                hwid: document.getElementById('sg-hwid').value.trim()
+                hwid: document.getElementById('sg-hwid').value.trim() || ''
             };
 
             saveDB().then(() => {
@@ -1753,6 +1906,180 @@
         }
 
         // ============================================================
+        // ADMIN USER MANAGEMENT
+        // ============================================================
+        function createAdminUser() {
+            const username = document.getElementById('cu-username').value.trim();
+            const password = document.getElementById('cu-password').value;
+            const role = document.getElementById('cu-role').value;
+            const expiry = getExpiryValue('cu-expiry', 'cu-life');
+
+            if (!username || !password) return showToast('Username and password required', 'var(--danger)');
+            if (password.length < 8) return showToast('Password must be at least 8 characters', 'var(--danger)');
+            if (DB.admin_users && DB.admin_users[username]) return showToast('User already exists', 'var(--danger)');
+
+            if (!DB.admin_users) DB.admin_users = {};
+            DB.admin_users[username] = {
+                password: password,
+                role: role,
+                expiry: expiry,
+                created: new Date().toISOString(),
+                id: 'ADM-' + String(Object.keys(DB.admin_users).length + 2).padStart(3, '0'),
+                disabled: false
+            };
+
+            saveDB().then(() => {
+                closeModal('modal-create-user');
+                updateAdminTable();
+                document.getElementById('cu-username').value = '';
+                document.getElementById('cu-password').value = '';
+                showToast(`Admin user created: ${username}`, 'var(--success)');
+            });
+        }
+
+        function updateAdminTable() {
+            const tbody = document.getElementById('admin-user-table');
+            tbody.innerHTML = `
+                <tr>
+                    <td style="font-family: var(--font-code); font-size: 0.8rem;">SYSTEM</td>
+                    <td><b>root</b></td>
+                    <td><span class="role-badge role-super">Super Admin</span></td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td style="font-size: 0.75rem; color: var(--text-dim);">Lifetime</td>
+                    <td style="font-size: 0.75rem; color: var(--text-dim);">System</td>
+                    <td><span style="color: var(--text-muted); font-size: 0.75rem;">Protected</span></td>
+                </tr>
+            `;
+
+            Object.entries(DB.admin_users || {}).forEach(([username, user]) => {
+                const roleClass = user.role === 'admin' ? 'role-admin' : (user.role === 'editor' ? 'role-admin' : 'role-user');
+                const roleLabel = user.role === 'admin' ? 'Admin' : (user.role === 'editor' ? 'Editor' : 'Viewer');
+                const expired = isAccountExpired(user);
+                const disabled = user.disabled === true;
+                
+                let statusBadge = '';
+                if (disabled) {
+                    statusBadge = '<span class="status-badge disabled">Disabled</span>';
+                } else if (expired) {
+                    statusBadge = '<span class="badge badge-expired">Expired</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-active">Active</span>';
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-family: var(--font-code); font-size: 0.8rem;">${user.id || '—'}</td>
+                        <td><b>${username}</b></td>
+                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size: 0.75rem; color: var(--text-dim);">${user.expiry === 'lifetime' ? 'Lifetime' : (user.expiry || '—')}</td>
+                        <td style="font-size: 0.75rem; color: var(--text-dim);">${user.created ? new Date(user.created).toLocaleDateString() : '—'}</td>
+                        <td>
+                            <button class="k-btn ${disabled ? 'warning' : 'danger'}" onclick="toggleUserStatus('${username}')" title="${disabled ? 'Enable' : 'Disable'}" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                                <i class="fas ${disabled ? 'fa-play' : 'fa-pause'}"></i>
+                            </button>
+                            <button class="k-btn danger" onclick="deleteAdminUser('${username}')" title="Delete" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleUserStatus(username) {
+            if (username === 'root') return showToast('Cannot modify root admin', 'var(--danger)');
+            if (!DB.admin_users[username]) return;
+            
+            DB.admin_users[username].disabled = !DB.admin_users[username].disabled;
+            saveDB().then(() => {
+                updateAdminTable();
+                showToast(
+                    DB.admin_users[username].disabled ? 'User disabled' : 'User enabled',
+                    DB.admin_users[username].disabled ? 'var(--danger)' : 'var(--success)'
+                );
+            });
+        }
+
+        function deleteAdminUser(username) {
+            if (username === 'root') return showToast('Cannot delete root admin', 'var(--danger)');
+            if (!confirm(`Delete admin user: ${username}?`)) return;
+            delete DB.admin_users[username];
+            saveDB().then(() => {
+                updateAdminTable();
+                showToast('Admin user deleted', 'var(--danger)');
+            });
+        }
+
+        // ============================================================
+        // ID GENERATOR
+        // ============================================================
+        function generateSecureID() {
+            const prefix = document.getElementById('gen-prefix').value || 'TNRYU';
+            const passLen = parseInt(document.getElementById('gen-passlen').value) || 16;
+
+            const username = `${prefix}_${cryptoRandomString(6).toUpperCase()}`;
+            const password = generateStrongPassword(passLen);
+
+            generatedCreds = { username, password, role: 'admin' };
+            document.getElementById('gen-username').textContent = username;
+            document.getElementById('gen-password').textContent = password;
+            document.getElementById('gen-role').textContent = 'Admin';
+            document.getElementById('gen-result').style.display = 'block';
+
+            showToast('Credentials generated', 'var(--primary)');
+        }
+
+        function generatePasswordOnly() {
+            const passLen = parseInt(document.getElementById('gen-passlen').value) || 16;
+            const password = generateStrongPassword(passLen);
+
+            generatedCreds = { password, role: 'password_only' };
+            document.getElementById('gen-username').textContent = '—';
+            document.getElementById('gen-password').textContent = password;
+            document.getElementById('gen-role').textContent = 'Password Only';
+            document.getElementById('gen-result').style.display = 'block';
+
+            showToast('Password generated', 'var(--primary)');
+        }
+
+        function saveGeneratedUser() {
+            if (!generatedCreds) return showToast('Generate credentials first', 'var(--warning)');
+
+            if (generatedCreds.role === 'admin') {
+                if (!DB.admin_users) DB.admin_users = {};
+                if (DB.admin_users[generatedCreds.username]) {
+                    return showToast('User already exists!', 'var(--danger)');
+                }
+                DB.admin_users[generatedCreds.username] = {
+                    password: generatedCreds.password,
+                    role: 'admin',
+                    expiry: 'lifetime',
+                    created: new Date().toISOString(),
+                    id: 'ADM-' + String(Object.keys(DB.admin_users).length + 2).padStart(3, '0'),
+                    disabled: false
+                };
+                saveDB().then(() => {
+                    updateAdminTable();
+                    showToast('User saved to Firebase', 'var(--success)');
+                });
+            } else {
+                copyText(generatedCreds.password);
+                showToast('Password copied to clipboard', 'var(--success)');
+            }
+        }
+
+        function copyCredentials() {
+            if (!generatedCreds) return;
+            const text = generatedCreds.role === 'admin'
+                ? `Username: ${generatedCreds.username}\nPassword: ${generatedCreds.password}`
+                : generatedCreds.password;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Credentials copied!', 'var(--primary)');
+            });
+        }
+
+        // ============================================================
         // RENDERING
         // ============================================================
         function renderAll() {
@@ -1769,6 +2096,7 @@
                 document.getElementById('cfg-title').value = DB.dialog_config?.title || '';
                 document.getElementById('cfg-subtitle').value = DB.dialog_config?.subtitle || '';
                 document.getElementById('cfg-url').value = DB.dialog_config?.admin_url || '';
+                loadUserLoginSetting();
             }
         }
 
@@ -1906,147 +2234,6 @@
                     <div class="log-status">${log.status || 'Active'}</div>
                 `;
                 list.appendChild(card);
-            });
-        }
-
-        // ============================================================
-        // ADMIN USER MANAGEMENT
-        // ============================================================
-        function createAdminUser() {
-            const username = document.getElementById('cu-username').value.trim();
-            const password = document.getElementById('cu-password').value;
-            const role = document.getElementById('cu-role').value;
-            const expiry = getExpiryValue('cu-expiry', 'cu-life');
-
-            if (!username || !password) return showToast('Username and password required', 'var(--danger)');
-            if (password.length < 8) return showToast('Password must be at least 8 characters', 'var(--danger)');
-            if (DB.admin_users && DB.admin_users[username]) return showToast('User already exists', 'var(--danger)');
-
-            if (!DB.admin_users) DB.admin_users = {};
-            DB.admin_users[username] = {
-                password: password,
-                role: role,
-                expiry: expiry,
-                created: new Date().toISOString(),
-                id: 'ADM-' + String(Object.keys(DB.admin_users).length + 2).padStart(3, '0')
-            };
-
-            saveDB().then(() => {
-                closeModal('modal-create-user');
-                updateAdminTable();
-                document.getElementById('cu-username').value = '';
-                document.getElementById('cu-password').value = '';
-                showToast(`Admin user created: ${username}`, 'var(--success)');
-            });
-        }
-
-        function updateAdminTable() {
-            const tbody = document.getElementById('admin-user-table');
-            tbody.innerHTML = `
-                <tr>
-                    <td style="font-family: var(--font-code); font-size: 0.8rem;">ADM-001</td>
-                    <td><b>root</b></td>
-                    <td><span class="role-badge role-admin">Super Admin</span></td>
-                    <td><span class="badge badge-active">Active</span></td>
-                    <td style="font-size: 0.75rem; color: var(--text-dim);">System</td>
-                    <td><span style="color: var(--text-muted); font-size: 0.75rem;">Protected</span></td>
-                </tr>
-            `;
-
-            Object.entries(DB.admin_users || {}).forEach(([username, user]) => {
-                const roleClass = user.role === 'admin' ? 'role-admin' : (user.role === 'editor' ? 'role-admin' : 'role-user');
-                const roleLabel = user.role === 'admin' ? 'Admin' : (user.role === 'editor' ? 'Editor' : 'Viewer');
-                const expired = isAccountExpired(user);
-                const statusBadge = expired ? '<span class="badge badge-expired">Expired</span>' : '<span class="badge badge-active">Active</span>';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-family: var(--font-code); font-size: 0.8rem;">${user.id || '—'}</td>
-                        <td><b>${username}</b></td>
-                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
-                        <td>${statusBadge}</td>
-                        <td style="font-size: 0.75rem; color: var(--text-dim);">${user.created ? new Date(user.created).toLocaleDateString() : '—'}</td>
-                        <td>
-                            <button class="k-btn danger" onclick="deleteAdminUser('${username}')" title="Delete" style="width: 28px; height: 28px; font-size: 0.7rem;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function deleteAdminUser(username) {
-            if (username === 'root') return showToast('Cannot delete root admin', 'var(--danger)');
-            if (!confirm(`Delete admin user: ${username}?`)) return;
-            delete DB.admin_users[username];
-            saveDB().then(() => {
-                updateAdminTable();
-                showToast('Admin user deleted', 'var(--danger)');
-            });
-        }
-
-        // ============================================================
-        // ID GENERATOR
-        // ============================================================
-        function generateSecureID() {
-            const prefix = document.getElementById('gen-prefix').value || 'TNRYU';
-            const passLen = parseInt(document.getElementById('gen-passlen').value) || 16;
-
-            const username = `${prefix}_${cryptoRandomString(6).toUpperCase()}`;
-            const password = generateStrongPassword(passLen);
-
-            generatedCreds = { username, password, role: 'admin' };
-            document.getElementById('gen-username').textContent = username;
-            document.getElementById('gen-password').textContent = password;
-            document.getElementById('gen-role').textContent = 'Admin';
-            document.getElementById('gen-result').style.display = 'block';
-
-            showToast('Credentials generated', 'var(--primary)');
-        }
-
-        function generatePasswordOnly() {
-            const passLen = parseInt(document.getElementById('gen-passlen').value) || 16;
-            const password = generateStrongPassword(passLen);
-
-            generatedCreds = { password, role: 'password_only' };
-            document.getElementById('gen-username').textContent = '—';
-            document.getElementById('gen-password').textContent = password;
-            document.getElementById('gen-role').textContent = 'Password Only';
-            document.getElementById('gen-result').style.display = 'block';
-
-            showToast('Password generated', 'var(--primary)');
-        }
-
-        function saveGeneratedUser() {
-            if (!generatedCreds) return showToast('Generate credentials first', 'var(--warning)');
-
-            if (generatedCreds.role === 'admin') {
-                if (!DB.admin_users) DB.admin_users = {};
-                DB.admin_users[generatedCreds.username] = {
-                    password: generatedCreds.password,
-                    role: 'admin',
-                    expiry: 'lifetime',
-                    created: new Date().toISOString(),
-                    id: 'ADM-' + String(Object.keys(DB.admin_users).length + 2).padStart(3, '0')
-                };
-                saveDB().then(() => {
-                    updateAdminTable();
-                    showToast('User saved to Firebase', 'var(--success)');
-                });
-            } else {
-                copyText(generatedCreds.password);
-                showToast('Password copied to clipboard', 'var(--success)');
-            }
-        }
-
-        function copyCredentials() {
-            if (!generatedCreds) return;
-            const text = generatedCreds.role === 'admin'
-                ? `Username: ${generatedCreds.username}\nPassword: ${generatedCreds.password}`
-                : generatedCreds.password;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Credentials copied!', 'var(--primary)');
             });
         }
 
